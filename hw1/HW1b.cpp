@@ -56,26 +56,6 @@ void
 HW1b::resizeGL(int w, int h)
 {
 	// PUT YOUR CODE HERE
-	// compute aspect ratio
-	float xmax, ymax;
-	float ar = (float)w / h;
-	if (ar > 1.0) {		// wide screen
-		xmax = ar;
-		ymax = 1.;
-	}
-	else {		// tall screen
-		xmax = 1.;
-		ymax = 1 / ar;
-	}
-
-	// set viewport to occupy full canvas
-	glViewport(0, 0, w, h);
-
-	// init viewing coordinates for orthographic projection
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-
-	glOrtho(-xmax, xmax, -ymax, ymax, -1.0, 1.0);
 }
 
 
@@ -89,22 +69,6 @@ void
 HW1b::paintGL()
 {
 	// PUT YOUR CODE HERE
-	// clear canvas with background values
-	glClear(GL_COLOR_BUFFER_BIT);
-
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
-
-	// experiment with transformation by uncommenting next line
-	// glRotatef(45, 0, 0, 1);
-
-	// define polygon
-	glBegin(GL_POLYGON);
-	glVertex2f(-0.25f, -0.25f);
-	glVertex2f(-0.25f, 0.25f);
-	glVertex2f(0.25f, 0.25f);
-	glVertex2f(0.25f, -0.25f);
-	glEnd();
 }
 
 

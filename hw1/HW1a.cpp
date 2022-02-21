@@ -62,10 +62,10 @@ HW1a::HW1a(const QGLFormat &glf, QWidget *parent)
 void
 HW1a::initializeGL()
 {
-	// PUT YOUR CODE HERE
 	// init state variables
-	glClearColor(0.0, 0.0, 0.0, 0.0);	// set background color
-	glColor3f(1.0, 1.0, 1.0);			// set foreground color
+    glClearColor(0.0, 0.0, 0.0, 0.0);	// set background color
+    glColor3f   (1.0, 1.0, 1.0);		// set foreground color
+
 }
 
 
@@ -79,24 +79,27 @@ HW1a::initializeGL()
 void
 HW1a::resizeGL(int w, int h)
 {
-	// PUT YOUR CODE HERE
-	// divide the window in 3x3
-	m_winW = w / 3;
-	m_winH = h / 3;
+	// divide the window in (3x3)
+	m_winW = w/3;
+	m_winH = h/3;
 
-	// compute aspect ration
+	// compute aspect ratio
 	float xmax, ymax;
-	float ar = (float)w / h;
-	if (ar > 1.0) {		// wide screen
+	float ar = (float) w / h;
+	if(ar > 1.0) {		// wide screen
 		xmax = ar;
 		ymax = 1.;
-	}
-	else {				// tall screen
+	} else {		// tall screen
 		xmax = 1.;
-		ymax = 1 / ar;
+		ymax = 1/ar;
 	}
 
-	glOrtho(-xmax, xmax, -ymax, ymax, -1.0, 1.0);
+    // set viewport to occupy full canvas
+    glViewport(0, 0, w, h);
+
+    // init viewing coordinates for orthographic projection
+    glLoadIdentity();
+    glOrtho(-xmax, xmax, -ymax, ymax, -1.0, 1.0);
 }
 
 
@@ -109,28 +112,45 @@ HW1a::resizeGL(int w, int h)
 void
 HW1a::paintGL()
 {
-	// PUT YOUR CODE HERE
-	// Clear canvas with background values
-	glClear(GL_COLOR_BUFFER_BIT);
-
-	for (int i = 0; i < 9; i++) {
-
-		// set viewport to occupy 3x3 canvas
-		glViewport((i % 3)*m_winW, (i / 3)*m_winH, m_winW, m_winH);
-
-		glMatrixMode(GL_PROJECTION);
-		glLoadIdentity();
-
-		// define the drawing mode
-		glBegin(DrawModes[i]);
-		// go through the vertices
-		for (int j = 0; j < 32; j += 2) {
-			glVertex2f(Vertices[j], Vertices[j + 1]);
-		}
-		glEnd();
-		glFlush();
-	}
+    // clear canvas with background values
+    glClear(GL_COLOR_BUFFER_BIT);
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+    float w_div_3 = m_winW;
+    float h_div_3 = m_winH;
+    for (int i = 0; i < 9; i++) {
+        glViewport(w_div_3 * (i % 3), h_div_3 * (i / 3), w_div_3, h_div_3);
+        glBegin(DrawModes[i]); 
+        for (int j = 0; j < 32; j+=2) {
+            glVertex2f(Vertices[j], Vertices[j+1]);
+        }
+        glEnd();
+    }
 }
+// void
+// HW1a::paintGL()
+// {
+// 	// Clear canvas with background values
+// 	glClear(GL_COLOR_BUFFER_BIT);
+
+// 	// local variable
+// 	int current_shape = 0;
+
+// 	for (int i = 0; i < 9; i ++){
+// 		// seperate them
+// 		glViewport((i%3)*m_winH, (i/3)*m_winW, m_winH, m_winW);
+
+// 		// define the drawing mode
+// 		glBegin(DrawModes[current_shape]);
+
+// 		// go through the vertices - similar to hw0b.cpp
+// 		for (int j = 0; j < 32; j += 2){
+// 			glVertex2f(Vertices[j], Vertices[j+1]);
+// 		}
+// 		glEnd();
+// 		current_shape++;
+// 	}
+// }
 
 
 

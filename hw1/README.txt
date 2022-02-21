@@ -1,6 +1,6 @@
 Group:
 -Student Name: Greg Kimatov 
--Student Email: GKimatov@citymail.cuny.edu
+-Student Email: gkimato000@citymail.cuny.edu
 
 -Student Name: Tenzin Tashi
 -Student Email: TTashi001@citymail.cuny.edu

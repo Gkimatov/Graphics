@@ -10,7 +10,17 @@ uniform	mat4	u_Projection;	// uniform variable for passing projection matrix
 uniform	float	u_Theta;	// Theta parameter
 uniform	int	u_Twist;	// Twist flag
 
+vec2 rotTwist(vec2 p)
+{
+    float d = u_Twist == 1 ? sqrt(p[0]*p[0] + p[1]*p[1]) : 1;
+    float sinTheta = sin(d*u_Theta);
+    float cosTheta = cos(d*u_Theta);
+    return vec2(p[0]*cosTheta - p[1]*sinTheta, p[0]*sinTheta + p[1]*cosTheta);
+}
+
 void main() 
 {
-	// PUT YOUR CODE HERE
+    v_Color = vec4(a_Color, 1);
+    gl_Position =   u_Projection * vec4(rotTwist(a_Position), 0, 1);
+    
 }

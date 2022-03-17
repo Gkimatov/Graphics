@@ -10,7 +10,7 @@
 #include "HW2b.h"
 
 // shader ID
-enum {HW2B};
+enum { HW2B };
 
 // uniform ID
 enum {
@@ -33,7 +33,7 @@ HW2b::HW2b(const QGLFormat &glf, QWidget *parent) : HW(glf, parent)
 	m_theta = 0.0f;
 	m_subdivisions = 4;
 	m_twist = true;
-	m_modelview .setToIdentity();
+	m_modelview.setToIdentity();
 	m_projection.setToIdentity();
 }
 
@@ -59,7 +59,7 @@ HW2b::initializeGL()
 
 	// init state variables
 	glClearColor(0.0, 0.0, 0.0, 0.0);	// set background color
-	glColor3f   (1.0, 1.0, 0.0);		// set foreground color
+	glColor3f(1.0, 1.0, 0.0);		// set foreground color
 }
 
 
@@ -73,7 +73,30 @@ HW2b::initializeGL()
 void
 HW2b::resizeGL(int w, int h)
 {
-	// PUT YOUR CODE HERE
+	// save window dimensions
+	m_winW = w;
+	m_winH = h;
+
+	// compute aspect ratio
+	float ar = (float)w / h;
+
+	// set xmax, ymax
+	float xmax, ymax;
+	if (ar > 1.0) {		// wide screen
+		xmax = ar;
+		ymax = 1.;
+	}
+	else {		// tall screen
+		xmax = 1.;
+		ymax = 1 / ar;
+	}
+
+	// set viewport to occupy full canvas
+	glViewport(0, 0, w, h);
+
+	// init viewing coordinates for orthographic projection
+	m_projection.setToIdentity();
+	m_projection.ortho(-xmax, xmax, -ymax, ymax, -1.0, 1.0);
 }
 
 
@@ -86,7 +109,24 @@ HW2b::resizeGL(int w, int h)
 void
 HW2b::paintGL()
 {
-	// PUT YOUR CODE HERE
+	glClear(GL_COLOR_BUFFER_BIT); // clear the buffers enabled for color writing
+
+	// use glsl program
+	glUseProgram(m_program[HW2B].programId());
+
+	// pass the following parameters to vertex the shader:
+	// projection matrix, modelview matrix, theta, and twist
+	glUniformMatrix4fv(m_uniform[HW2B][PROJ], 1, GL_FALSE, m_projection.constData());
+	glUniformMatrix4fv(m_uniform[HW2B][MV], 1, GL_FALSE, m_modelview.constData());
+	glUniform1f(m_uniform[HW2B][THETA], m_theta);
+	glUniform1i(m_uniform[HW2B][TWIST], m_twist);
+
+
+	// draw triangles
+	glDrawArrays(GL_TRIANGLES, 0, m_numPoints);
+
+	// terminate program; rendering is done
+	glUseProgram(0);
 }
 
 
@@ -109,7 +149,7 @@ HW2b::controlPanel()
 	label[1] = new QLabel("Subdivide");
 
 	// create sliders
-	m_sliderTheta  = new QSlider(Qt::Horizontal);
+	m_sliderTheta = new QSlider(Qt::Horizontal);
 	m_sliderSubdiv = new QSlider(Qt::Horizontal);
 
 	// init sliders
@@ -132,11 +172,11 @@ HW2b::controlPanel()
 
 	// layout for assembling widgets
 	QGridLayout *layout = new QGridLayout;
-	layout->addWidget(label[0],	   0, 0);
-	layout->addWidget(m_sliderTheta,   0, 1);
-	layout->addWidget(m_spinBoxTheta,  0, 2);
-	layout->addWidget(label[1],	   1, 0);
-	layout->addWidget(m_sliderSubdiv,  1, 1);
+	layout->addWidget(label[0], 0, 0);
+	layout->addWidget(m_sliderTheta, 0, 1);
+	layout->addWidget(m_spinBoxTheta, 0, 2);
+	layout->addWidget(label[1], 1, 0);
+	layout->addWidget(m_sliderSubdiv, 1, 1);
 	layout->addWidget(m_spinBoxSubdiv, 1, 2);
 	layout->addWidget(m_checkBoxTwist, 2, 0);
 
@@ -144,11 +184,11 @@ HW2b::controlPanel()
 	groupBox->setLayout(layout);
 
 	// init signal/slot connections
-	connect(m_sliderTheta,   SIGNAL(valueChanged(int)), this, SLOT(changeTheta (int)));
-	connect(m_sliderSubdiv,  SIGNAL(valueChanged(int)), this, SLOT(changeSubdiv(int)));
-	connect(m_spinBoxTheta,  SIGNAL(valueChanged(int)), this, SLOT(changeTheta (int)));
+	connect(m_sliderTheta, SIGNAL(valueChanged(int)), this, SLOT(changeTheta(int)));
+	connect(m_sliderSubdiv, SIGNAL(valueChanged(int)), this, SLOT(changeSubdiv(int)));
+	connect(m_spinBoxTheta, SIGNAL(valueChanged(int)), this, SLOT(changeTheta(int)));
 	connect(m_spinBoxSubdiv, SIGNAL(valueChanged(int)), this, SLOT(changeSubdiv(int)));
-	connect(m_checkBoxTwist, SIGNAL(stateChanged(int)), this, SLOT(changeTwist (int)));
+	connect(m_checkBoxTwist, SIGNAL(stateChanged(int)), this, SLOT(changeTwist(int)));
 
 	return(groupBox);
 }
@@ -164,9 +204,9 @@ void
 HW2b::reset()
 {
 	// reset parameters
-	m_theta		= 0.0f;
-	m_subdivisions	= 4;
-	m_twist		= true;
+	m_theta = 0.0f;
+	m_subdivisions = 4;
+	m_twist = true;
 
 	// reset sliders and spinboxes
 	m_sliderTheta->blockSignals(true);
@@ -210,14 +250,13 @@ HW2b::initShaders()
 
 	// init uniforms hash table based on uniform variable names and location IDs
 	UniformMap uniforms;
-	uniforms["u_Modelview" ] = MV;
+	uniforms["u_Modelview"] = MV;
 	uniforms["u_Projection"] = PROJ;
-	uniforms["u_Theta"     ] = THETA;
-	uniforms["u_Twist"     ] = TWIST;
+	uniforms["u_Theta"] = THETA;
+	uniforms["u_Twist"] = TWIST;
 
 	// compile shader, bind attribute vars, link shader, and initialize uniform var table
-	initShader(HW2B, QString(":/hw2/vshader2b.glsl"), 
-	                 QString(":/hw2/fshader2b.glsl"), uniforms);
+	initShader(HW2B, QString(":/hw2/vshader2b.glsl"), QString(":/hw2/fshader2b.glsl"), uniforms);
 }
 
 
@@ -230,25 +269,49 @@ HW2b::initShaders()
 void
 HW2b::initVertexBuffer()
 {
+	// set flag for creating buffers (1st time only)
+	static bool flag = 1;
+
+	// verify that we have valid vertex/color buffers
+	static GLuint vertexBuffer = -1;
+	static GLuint colorBuffer = -1;
+	if (flag) {      // create vertex and color buffers
+		glGenBuffers(1, &vertexBuffer);
+		glGenBuffers(1, &colorBuffer);
+		flag = 0;       // reset flag
+	}
+
 	// init geometry data
 	const vec2 vertices[] = {
-		vec2( 0.0f,   0.75f ),
-		vec2( 0.65f, -0.375f),
+		vec2(0.0f,   0.75f),
+		vec2(0.65f, -0.375f),
 		vec2(-0.65f, -0.375f)
 	};
 
 	// recursively subdivide triangle into triangular facets;
 	// store vertex positions and colors in m_points and m_colors, respectively
 	divideTriangle(vertices[0], vertices[1], vertices[2], m_subdivisions);
-	m_numPoints = (int) m_points.size();		// save number of vertices
+	m_numPoints = (int)m_points.size();		// save number of vertices
 
 	// bind vertex buffer to the GPU and copy the vertices from CPU to GPU
-	glBindBuffer(GL_ARRAY_BUFFER, m_vertexBuffer);
-	glBufferData(GL_ARRAY_BUFFER, m_numPoints*sizeof(vec2), &m_points[0], GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
+	glBufferData(GL_ARRAY_BUFFER, m_numPoints * sizeof(vec2), &m_points[0], GL_STATIC_DRAW);
+
+	// enable the assignment of attribute vertex variable
+	glEnableVertexAttribArray(ATTRIB_VERTEX);
+
+	// assign the buffer object to the attribute vertex variable
+	glVertexAttribPointer(ATTRIB_VERTEX, 2, GL_FLOAT, false, 0, NULL);
 
 	// bind color buffer to the GPU and copy the colors from CPU to GPU
-	glBindBuffer(GL_ARRAY_BUFFER, m_colorBuffer);
-	glBufferData(GL_ARRAY_BUFFER, m_numPoints*sizeof(vec3), &m_colors[0], GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, colorBuffer);
+	glBufferData(GL_ARRAY_BUFFER, m_numPoints * sizeof(vec3), &m_colors[0], GL_STATIC_DRAW);
+
+	// enable the assignment of attribute color variable
+	glEnableVertexAttribArray(ATTRIB_COLOR);
+
+	// assign the buffer object to the attribute color variable
+	glVertexAttribPointer(ATTRIB_COLOR, 3, GL_FLOAT, false, 0, NULL);
 
 	// clear vertex and color vectors because they have already been copied into GPU
 	m_points.clear();
@@ -265,7 +328,18 @@ HW2b::initVertexBuffer()
 void
 HW2b::divideTriangle(vec2 a, vec2 b, vec2 c, int count)
 {
-	// PUT YOUR CODE HERE
+	if (count > 0) {
+		// find midpoint vertices of triangle
+		vec2 ab = vec2((a[0] + b[0]) / 2.0, (a[1] + b[1]) / 2.0);
+		vec2 ac = vec2((a[0] + c[0]) / 2.0, (a[1] + c[1]) / 2.0);
+		vec2 bc = vec2((b[0] + c[0]) / 2.0, (b[1] + c[1]) / 2.0);
+		// create the triangles out of the midpoints, count - 1 times.
+		divideTriangle(a, ab, ac, count - 1);
+		divideTriangle(b, bc, ab, count - 1);
+		divideTriangle(c, ac, bc, count - 1);
+		divideTriangle(ab, ac, bc, count - 1);
+	}
+	else triangle(a, b, c);
 }
 
 
@@ -284,9 +358,9 @@ HW2b::triangle(vec2 v1, vec2 v2, vec2 v3)
 	m_points.push_back(v3);
 
 	// init color
-	float r = (float) rand() / RAND_MAX;
-	float g = (float) rand() / RAND_MAX;
-	float b = (float) rand() / RAND_MAX;
+	float r = (float)rand() / RAND_MAX;
+	float g = (float)rand() / RAND_MAX;
+	float b = (float)rand() / RAND_MAX;
 	m_colors.push_back(vec3(r, g, b));
 	m_colors.push_back(vec3(r, g, b));
 	m_colors.push_back(vec3(r, g, b));

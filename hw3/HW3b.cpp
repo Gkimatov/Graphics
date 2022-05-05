@@ -10,15 +10,15 @@
 #include "HW3b.h"
 
 // shader ID
-enum {TEX_SHADER, WIRE_SHADER, FLAT_SHADER, SMOOTH_SHADER, SMOOTH_TEX};
+enum { TEX_SHADER, WIRE_SHADER, FLAT_SHADER, SMOOTH_SHADER, SMOOTH_TEX };
 
 // uniform ID
 enum { MODEL, VIEW, PROJ, LIGHTDIR, SAMPLER };
 
 // wave program enums
 enum { WIREFRAME, TEXTURED, TEXTURED_WIREFRAME, FLAT_COLOR, SMOOTH_COLOR, SMOOTH_TEXTURE };
-enum {WEAK, NORMAL, STRONG};
-enum {FLAT, SPIKE, DIAGONALWALL, SIDEWALL, HOLE, MIDDLEBLOCK, DIAGONALBLOCK, CORNERBLOCK, HILL, HILLFOUR};
+enum { WEAK, NORMAL, STRONG };
+enum { FLAT, SPIKE, DIAGONALWALL, SIDEWALL, HOLE, MIDDLEBLOCK, DIAGONALBLOCK, CORNERBLOCK, HILL, HILLFOUR };
 #define SQRTOFTWOINV 1.0 / 1.414213562
 
 
@@ -33,12 +33,12 @@ HW3b::HW3b(const QGLFormat &glf, QWidget *parent) : HW(glf, parent)
 	connect(m_timer, SIGNAL(timeout()), this, SLOT(timeOut()));
 
 	// reset parameters
-	m_grid		= 32;
-	m_displayMode	= TEXTURED_WIREFRAME;
-	m_geometryMode  = MIDDLEBLOCK;
-	m_speed		= 1;
-	m_angularSpeed	= -30.0f;
-	m_wave		= false;
+	m_grid = 32;
+	m_displayMode = TEXTURED_WIREFRAME;
+	m_geometryMode = MIDDLEBLOCK;
+	m_speed = 1;
+	m_angularSpeed = -30.0f;
+	m_wave = false;
 }
 
 
@@ -83,7 +83,7 @@ HW3b::initializeGL()
 	m_light = new Light;
 
 	// set light position and direction	
-	m_light->set (vec3(1.0f, -2.0f, 2.0f), vec3(0, 0, 0));
+	m_light->set(vec3(1.0f, -2.0f, 2.0f), vec3(0, 0, 0));
 
 	// enable depth buffer
 	glEnable(GL_DEPTH_TEST);
@@ -157,7 +157,7 @@ HW3b::paintGL()
 	glVertexAttribPointer(ATTRIB_NORMAL, 3, GL_FLOAT, false, 0, NULL);
 
 	// draw textured triangles
-	switch(m_displayMode) {
+	switch (m_displayMode) {
 	case TEXTURED_WIREFRAME:
 	case TEXTURED:
 		// draw textured surface
@@ -170,7 +170,7 @@ HW3b::paintGL()
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_indicesBuffer[0]);
 		glDrawElements(GL_TRIANGLE_STRIP, (GLsizei)m_indices_triangles.size(), GL_UNSIGNED_SHORT, 0);
 		glBindTexture(GL_TEXTURE_2D, 0);
-		if(m_displayMode != TEXTURED_WIREFRAME)
+		if (m_displayMode != TEXTURED_WIREFRAME)
 			break;
 	case WIREFRAME:
 		// draw wireframe
@@ -182,37 +182,37 @@ HW3b::paintGL()
 		glDrawElements(GL_LINES, (GLsizei)m_indices_wireframe.size(), GL_UNSIGNED_SHORT, 0);
 		break;
 	case FLAT_COLOR:
-		glUseProgram(m_program[FLAT_SHADER].programId());	
-		glUniformMatrix4fv(m_uniform[FLAT_SHADER][VIEW ], 1, GL_FALSE, m_camera->view().constData());
-		glUniformMatrix4fv(m_uniform[FLAT_SHADER][PROJ ], 1, GL_FALSE, m_projection.constData());
+		glUseProgram(m_program[FLAT_SHADER].programId());
+		glUniformMatrix4fv(m_uniform[FLAT_SHADER][VIEW], 1, GL_FALSE, m_camera->view().constData());
+		glUniformMatrix4fv(m_uniform[FLAT_SHADER][PROJ], 1, GL_FALSE, m_projection.constData());
 		glUniform3fv(m_uniform[FLAT_SHADER][LIGHTDIR], 1, &m_light->eye()[0]);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_indicesBuffer[0]);
-		glDrawElements(GL_TRIANGLE_STRIP, (GLsizei) m_indices_triangles.size(), GL_UNSIGNED_SHORT, 0);
+		glDrawElements(GL_TRIANGLE_STRIP, (GLsizei)m_indices_triangles.size(), GL_UNSIGNED_SHORT, 0);
 		break;
 	case SMOOTH_COLOR:
-		glUseProgram(m_program[SMOOTH_SHADER].programId());	
-		glUniformMatrix4fv(m_uniform[SMOOTH_SHADER][VIEW ], 1, GL_FALSE, m_camera->view().constData());
-		glUniformMatrix4fv(m_uniform[SMOOTH_SHADER][PROJ ], 1, GL_FALSE, m_projection.constData());
+		glUseProgram(m_program[SMOOTH_SHADER].programId());
+		glUniformMatrix4fv(m_uniform[SMOOTH_SHADER][VIEW], 1, GL_FALSE, m_camera->view().constData());
+		glUniformMatrix4fv(m_uniform[SMOOTH_SHADER][PROJ], 1, GL_FALSE, m_projection.constData());
 		glUniform3fv(m_uniform[FLAT_SHADER][LIGHTDIR], 1, &m_light->eye()[0]);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_indicesBuffer[0]);
-		glDrawElements(GL_TRIANGLE_STRIP, (GLsizei) m_indices_triangles.size(), GL_UNSIGNED_SHORT, 0);
+		glDrawElements(GL_TRIANGLE_STRIP, (GLsizei)m_indices_triangles.size(), GL_UNSIGNED_SHORT, 0);
 		break;
 	case SMOOTH_TEXTURE:
 		glBindTexture(GL_TEXTURE_2D, m_texture);
-		glUseProgram(m_program[SMOOTH_TEX].programId());	
-		glUniformMatrix4fv(m_uniform[SMOOTH_TEX][VIEW ], 1, GL_FALSE, m_camera->view().constData());
-		glUniformMatrix4fv(m_uniform[SMOOTH_TEX][PROJ ], 1, GL_FALSE, m_projection.constData());
+		glUseProgram(m_program[SMOOTH_TEX].programId());
+		glUniformMatrix4fv(m_uniform[SMOOTH_TEX][VIEW], 1, GL_FALSE, m_camera->view().constData());
+		glUniformMatrix4fv(m_uniform[SMOOTH_TEX][PROJ], 1, GL_FALSE, m_projection.constData());
 		glUniform3fv(m_uniform[SMOOTH_TEX][LIGHTDIR], 1, &m_light->eye()[0]);
 		glUniform1i(m_uniform[SMOOTH_TEX][SAMPLER], 0);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_indicesBuffer[0]);
-		glDrawElements(GL_TRIANGLE_STRIP, (GLsizei) m_indices_triangles.size(), GL_UNSIGNED_SHORT, 0);
+		glDrawElements(GL_TRIANGLE_STRIP, (GLsizei)m_indices_triangles.size(), GL_UNSIGNED_SHORT, 0);
 		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 
 	// display light position and direction
 	glUseProgram(m_program[WIRE_SHADER].programId());	// use wireframe glsl progam
-	glUniformMatrix4fv(m_uniform[WIRE_SHADER][VIEW ], 1, GL_FALSE, m_camera->view().constData());
-	glUniformMatrix4fv(m_uniform[WIRE_SHADER][PROJ ], 1, GL_FALSE, m_projection.constData());
+	glUniformMatrix4fv(m_uniform[WIRE_SHADER][VIEW], 1, GL_FALSE, m_camera->view().constData());
+	glUniformMatrix4fv(m_uniform[WIRE_SHADER][PROJ], 1, GL_FALSE, m_projection.constData());
 	m_light->display();
 	glUseProgram(0);
 
@@ -291,16 +291,16 @@ HW3b::controlPanel()
 
 	// layout for assembling widgets
 	QGridLayout *layout = new QGridLayout;
-	layout->addWidget(label[0],		0, 0);
-	layout->addWidget(m_comboBoxDisplay,	0, 1);
-	layout->addWidget(label[1],		1, 0);
-	layout->addWidget(m_comboBoxGeom,	1, 1);
-	layout->addWidget(label[2],		2, 0);
-	layout->addWidget(m_sliderSize,		2, 1);
-	layout->addWidget(m_spinBoxSize,	2, 2);
-	layout->addWidget(label[3],		3, 0);
-	layout->addWidget(m_sliderSpeed,	3, 1);
-	layout->addWidget(m_spinBoxSpeed,	3, 2);
+	layout->addWidget(label[0], 0, 0);
+	layout->addWidget(m_comboBoxDisplay, 0, 1);
+	layout->addWidget(label[1], 1, 0);
+	layout->addWidget(m_comboBoxGeom, 1, 1);
+	layout->addWidget(label[2], 2, 0);
+	layout->addWidget(m_sliderSize, 2, 1);
+	layout->addWidget(m_spinBoxSize, 2, 2);
+	layout->addWidget(label[3], 3, 0);
+	layout->addWidget(m_sliderSpeed, 3, 1);
+	layout->addWidget(m_spinBoxSpeed, 3, 2);
 
 	// vertical layout for assembling widgets
 	QVBoxLayout *vbox = new QVBoxLayout;
@@ -311,12 +311,12 @@ HW3b::controlPanel()
 	groupBox->setLayout(vbox);
 
 	// init signal/slot connections
-	connect(m_comboBoxDisplay,SIGNAL(currentIndexChanged(int)), this, SLOT(changeDisplay(int)));
-	connect(m_comboBoxGeom,   SIGNAL(currentIndexChanged(int)), this, SLOT(changeGeom   (int)));
-	connect(m_sliderSize,	  SIGNAL(valueChanged(int)),	    this, SLOT(changeSize(int)));
-	connect(m_spinBoxSize,    SIGNAL(valueChanged(int)),        this, SLOT(changeSize(int)));
-	connect(m_sliderSpeed,    SIGNAL(valueChanged(int)),        this, SLOT(changeSpeed(int)));
-	connect(m_buttonStart,    SIGNAL(released()),               this, SLOT(playPauseAnimation()));
+	connect(m_comboBoxDisplay, SIGNAL(currentIndexChanged(int)), this, SLOT(changeDisplay(int)));
+	connect(m_comboBoxGeom, SIGNAL(currentIndexChanged(int)), this, SLOT(changeGeom(int)));
+	connect(m_sliderSize, SIGNAL(valueChanged(int)), this, SLOT(changeSize(int)));
+	connect(m_spinBoxSize, SIGNAL(valueChanged(int)), this, SLOT(changeSize(int)));
+	connect(m_sliderSpeed, SIGNAL(valueChanged(int)), this, SLOT(changeSpeed(int)));
+	connect(m_buttonStart, SIGNAL(released()), this, SLOT(playPauseAnimation()));
 
 	return(groupBox);
 }
@@ -332,12 +332,12 @@ void
 HW3b::reset()
 {
 	// reset parameters
-	m_grid		= 32;
-	m_displayMode	= TEXTURED_WIREFRAME;
-	m_geometryMode	= MIDDLEBLOCK;
-	m_speed		= 1;
-	m_angularSpeed	= 30.0f;
-	m_wave		= false;
+	m_grid = 32;
+	m_displayMode = TEXTURED_WIREFRAME;
+	m_geometryMode = MIDDLEBLOCK;
+	m_speed = 1;
+	m_angularSpeed = 30.0f;
+	m_wave = false;
 
 	// reset variables
 	m_comboBoxDisplay->setCurrentIndex(m_displayMode);
@@ -366,19 +366,19 @@ void
 HW3b::resetMesh()
 {
 	// pause animation to reset grid without interruption by timer
-	if(m_wave) m_timer->stop();
+	if (m_wave) m_timer->stop();
 
-	for(int i=0; i< m_grid; ++i) {
-	   for(int j=0; j< m_grid; ++j) {
-		m_force[i][j] = 0.0f;
-		m_veloc[i][j] = 0.0f;
-		QVector3D &vec = m_vertices[i][j];
-		switch(m_geometryMode) {
+	for (int i = 0; i < m_grid; ++i) {
+		for (int j = 0; j < m_grid; ++j) {
+			m_force[i][j] = 0.0f;
+			m_veloc[i][j] = 0.0f;
+			QVector3D &vec = m_vertices[i][j];
+			switch (m_geometryMode) {
 			case FLAT:
 				vec.setZ(0.0f);
 				break;
 			case SPIKE:
-				vec.setZ((i==j && i==m_grid/2) ? 1.0f : 0.0f);
+				vec.setZ((i == j && i == m_grid / 2) ? 1.0f : 0.0f);
 				break;
 			case HOLE:
 				// PUT YOUR CODE HERE
@@ -412,8 +412,8 @@ HW3b::resetMesh()
 				// PUT YOUR CODE HERE
 				vec.setZ(sin(3.14 * 2 * ((float)i / (float)m_grid)) / 3 + sin(3.14 * 2 * ((float)j / (float)m_grid)) / 3);
 				break;
+			}
 		}
-	   }
 	}
 	getFaceNorms();
 	getVertNorms();
@@ -422,7 +422,7 @@ HW3b::resetMesh()
 	flatten2D();
 
 	// restart animation
-	if(m_wave) m_timer->start(10);
+	if (m_wave) m_timer->start(10);
 }
 
 
@@ -437,44 +437,44 @@ void HW3b::getForce(void)
 {
 	float d;
 
-	for(int i=0; i<m_grid; ++i)
-	    for(int j = 0; j<m_grid; ++j)
-		m_force[i][j] = 0.0f;
+	for (int i = 0; i < m_grid; ++i)
+		for (int j = 0; j < m_grid; ++j)
+			m_force[i][j] = 0.0f;
 
-	for(int i=1; i<m_grid-1; ++i) {
-	    for(int j = 1; j<m_grid-1; ++j) {
-		d = m_vertices[i][j].z() - m_vertices[i][j-1].z();
-		m_force[i][j]   -= d;
-		m_force[i][j-1] += d;
+	for (int i = 1; i < m_grid - 1; ++i) {
+		for (int j = 1; j < m_grid - 1; ++j) {
+			d = m_vertices[i][j].z() - m_vertices[i][j - 1].z();
+			m_force[i][j] -= d;
+			m_force[i][j - 1] += d;
 
-		d = m_vertices[i][j].z() - m_vertices[i-1][j].z();
-		m_force[i][j]   -= d;
-		m_force[i-1][j] += d;
+			d = m_vertices[i][j].z() - m_vertices[i - 1][j].z();
+			m_force[i][j] -= d;
+			m_force[i - 1][j] += d;
 
-		d = m_vertices[i][j].z() - m_vertices[i][j+1].z();
-		m_force[i][j]   -= d;
-		m_force[i][j+1] += d;
+			d = m_vertices[i][j].z() - m_vertices[i][j + 1].z();
+			m_force[i][j] -= d;
+			m_force[i][j + 1] += d;
 
-		d = m_vertices[i][j].z() - m_vertices[i+1][j].z();
-		m_force[i][j]   -= d;
-		m_force[i+1][j] += d;
+			d = m_vertices[i][j].z() - m_vertices[i + 1][j].z();
+			m_force[i][j] -= d;
+			m_force[i + 1][j] += d;
 
-		d = (m_vertices[i][j].z() - m_vertices[i+1][j+1].z())*SQRTOFTWOINV;
-		m_force[i][j]     -= d;
-		m_force[i+1][j+1] += d;
+			d = (m_vertices[i][j].z() - m_vertices[i + 1][j + 1].z())*SQRTOFTWOINV;
+			m_force[i][j] -= d;
+			m_force[i + 1][j + 1] += d;
 
-		d = (m_vertices[i][j].z() - m_vertices[i-1][j-1].z())*SQRTOFTWOINV;
-		m_force[i][j]     -= d;
-		m_force[i-1][j-1] += d;
+			d = (m_vertices[i][j].z() - m_vertices[i - 1][j - 1].z())*SQRTOFTWOINV;
+			m_force[i][j] -= d;
+			m_force[i - 1][j - 1] += d;
 
-		d = (m_vertices[i][j].z() - m_vertices[i+1][j-1].z())*SQRTOFTWOINV;
-		m_force[i][j]     -= d;
-		m_force[i+1][j-1] += d;
+			d = (m_vertices[i][j].z() - m_vertices[i + 1][j - 1].z())*SQRTOFTWOINV;
+			m_force[i][j] -= d;
+			m_force[i + 1][j - 1] += d;
 
-		d = (m_vertices[i][j].z() - m_vertices[i-1][j+1].z())*SQRTOFTWOINV;
-		m_force[i][j]     -= d;
-		m_force[i-1][j+1] += d;
-	    }
+			d = (m_vertices[i][j].z() - m_vertices[i - 1][j + 1].z())*SQRTOFTWOINV;
+			m_force[i][j] -= d;
+			m_force[i - 1][j + 1] += d;
+		}
 	}
 }
 
@@ -487,9 +487,9 @@ void HW3b::getForce(void)
 //
 void HW3b::getVelocity()
 {
-	for(int i=0; i<m_grid; ++i)
-	   for(int j=0; j<m_grid; ++j)
-		m_veloc[i][j] += m_force[i][j] * m_dt;
+	for (int i = 0; i < m_grid; ++i)
+		for (int j = 0; j < m_grid; ++j)
+			m_veloc[i][j] += m_force[i][j] * m_dt;
 }
 
 
@@ -501,9 +501,9 @@ void HW3b::getVelocity()
 //
 void HW3b::getPosition()
 {
-	for(int i=0; i<m_grid; ++i) {
-	   for(int j=0; j<m_grid; ++j)
-		m_vertices[i][j].setZ(m_vertices[i][j].z() + m_veloc[i][j]);
+	for (int i = 0; i < m_grid; ++i) {
+		for (int j = 0; j < m_grid; ++j)
+			m_vertices[i][j].setZ(m_vertices[i][j].z() + m_veloc[i][j]);
 	}
 }
 
@@ -515,7 +515,7 @@ void HW3b::getPosition()
 // Virtual function called when timer times out.
 // We use it to stop timer, recompute surface heights, and restart timer.
 //
-void 
+void
 HW3b::timeOut()
 {
 	// pause animation to reset grid without interruption by timer
@@ -555,7 +555,7 @@ HW3b::initTexture()
 	QImage qImage = QGLWidget::convertToGLFormat(m_image);
 
 	// init vars
-	int w = qImage.width ();
+	int w = qImage.width();
 	int h = qImage.height();
 
 	// generate texture name and bind it
@@ -585,48 +585,48 @@ HW3b::initShaders()
 	UniformMap uniforms;
 
 	// init uniform hash table based on uniform variable names and location IDs
-	uniforms["u_View"      ] = VIEW;
+	uniforms["u_View"] = VIEW;
 	uniforms["u_Projection"] = PROJ;
-	uniforms["u_Sampler"   ] = SAMPLER;
+	uniforms["u_Sampler"] = SAMPLER;
 
 	// compile shader, bind attribute vars, link shader, and initialize uniform var table
-	initShader(TEX_SHADER,  QString(":/hw3/vshader3b1.glsl"), 
-				QString(":/hw3/fshader3b1.glsl"), uniforms);
+	initShader(TEX_SHADER, QString(":/hw3/vshader3b1.glsl"),
+		QString(":/hw3/fshader3b1.glsl"), uniforms);
 
 	// reset uniform hash table for next shader
 	uniforms.clear();
-	uniforms["u_View"      ] = VIEW;
+	uniforms["u_View"] = VIEW;
 	uniforms["u_Projection"] = PROJ;
 
 	// compile shader, bind attribute vars, link shader, and initialize uniform var table
-	initShader(WIRE_SHADER, QString(":/hw3/vshader3b2.glsl"), 
-				QString(":/hw3/fshader3b2.glsl"), uniforms);
+	initShader(WIRE_SHADER, QString(":/hw3/vshader3b2.glsl"),
+		QString(":/hw3/fshader3b2.glsl"), uniforms);
 
 	// reset uniform hash table for next shader
 	uniforms.clear();
-	uniforms["u_View"          ] = VIEW;
-	uniforms["u_Projection"    ] = PROJ;
+	uniforms["u_View"] = VIEW;
+	uniforms["u_Projection"] = PROJ;
 	uniforms["u_LightDirection"] = LIGHTDIR;
 	// compile shader, bind attribute vars, link shader, and initialize uniform var table
-	initShader(FLAT_SHADER, QString(":/hw3/vshader3b3.glsl"), 
-				QString(":/hw3/fshader3b3.glsl"), uniforms);
+	initShader(FLAT_SHADER, QString(":/hw3/vshader3b3.glsl"),
+		QString(":/hw3/fshader3b3.glsl"), uniforms);
 
 	uniforms.clear();
-	uniforms["u_View"          ] = VIEW;
-	uniforms["u_Projection"    ] = PROJ;
+	uniforms["u_View"] = VIEW;
+	uniforms["u_Projection"] = PROJ;
 	uniforms["u_LightDirection"] = LIGHTDIR;
 	// compile shader, bind attribute vars, link shader, and initialize uniform var table
-	initShader(SMOOTH_SHADER, QString(":/hw3/vshader3b4.glsl"), 
-				  QString(":/hw3/fshader3b4.glsl"), uniforms);
+	initShader(SMOOTH_SHADER, QString(":/hw3/vshader3b4.glsl"),
+		QString(":/hw3/fshader3b4.glsl"), uniforms);
 
 	uniforms.clear();
-	uniforms["u_View"          ] = VIEW;
-	uniforms["u_Projection"    ] = PROJ;
+	uniforms["u_View"] = VIEW;
+	uniforms["u_Projection"] = PROJ;
 	uniforms["u_LightDirection"] = LIGHTDIR;
-	uniforms["u_Sampler"       ] = SAMPLER;
+	uniforms["u_Sampler"] = SAMPLER;
 	// compile shader, bind attribute vars, link shader, and initialize uniform var table
-	initShader(SMOOTH_TEX,  QString(":/hw3/vshader3b5.glsl"), 
-				QString(":/hw3/fshader3b5.glsl"), uniforms);
+	initShader(SMOOTH_TEX, QString(":/hw3/vshader3b5.glsl"),
+		QString(":/hw3/fshader3b5.glsl"), uniforms);
 }
 
 
@@ -645,49 +645,49 @@ HW3b::initVertices()
 	// map the grid coordinates to [-1.0, 1.0]; function called when m_grid changes
 	// flip y-coordinates because array orientation is upside down wrt graphics coordinates
 	int size = m_grid - 1;
-	for(int y=0; y < m_grid; ++y) {
-		for(int x=0; x < m_grid; ++x) {
+	for (int y = 0; y < m_grid; ++y) {
+		for (int x = 0; x < m_grid; ++x) {
 			vec3 &vec = m_vertices[y][x];
 			vec.setX(-1 + (2. * x / size));
-			vec.setY(-1 + (2. * (size-y) / size));
+			vec.setY(-1 + (2. * (size - y) / size));
 			m_colors.push_back(vec3(0.2f, 0.9f, 1.0f));
 
 			// init texture coordinates
 			vec2 &texCoord = m_texCoords[y][x];
-			texCoord.setX((float) x / size);
-			texCoord.setY((float) (size-y) / size);
+			texCoord.setX((float)x / size);
+			texCoord.setY((float)(size - y) / size);
 		}
 	}
 
 	// create indices with degenerate triangles (stitching)
 	m_indices_triangles.clear();
-	for(int y=0; y < m_grid-1; ++y) {
+	for (int y = 0; y < m_grid - 1; ++y) {
 		ushort base = y * m_grid;
-		if(y > 0) {
+		if (y > 0) {
 			// Degenerate begin: repeat first vertex
 			m_indices_triangles.push_back(base);
 		}
-		for(int x=0; x < m_grid; ++x){
+		for (int x = 0; x < m_grid; ++x) {
 			m_indices_triangles.push_back(base + x);
 			m_indices_triangles.push_back(base + m_grid + x);
 		}
-		if(y < m_grid-2)
-			m_indices_triangles.push_back((y+1) * m_grid + (m_grid - 1));
+		if (y < m_grid - 2)
+			m_indices_triangles.push_back((y + 1) * m_grid + (m_grid - 1));
 	}
 
 	// create indices for wireframe rendering (horizontal lines)
 	m_indices_wireframe.clear();
-	for(int y=0; y < m_grid; ++y) {
+	for (int y = 0; y < m_grid; ++y) {
 		ushort base = y * m_grid;
-		for(int x = 0; x < m_grid-1; ++x){
+		for (int x = 0; x < m_grid - 1; ++x) {
 			m_indices_wireframe.push_back(base + x);
 			m_indices_wireframe.push_back(base + x + 1);
 		}
 	}
 
 	// create indices for wireframe rendering (vertical lines)
-	for(int x=0; x < m_grid; ++x) {
-		for(int y=0; y < m_grid-1; ++y){
+	for (int x = 0; x < m_grid; ++x) {
+		for (int y = 0; y < m_grid - 1; ++y) {
 			ushort base = y * m_grid;
 			m_indices_wireframe.push_back(base + x);
 			m_indices_wireframe.push_back(base + x + m_grid);
@@ -705,18 +705,18 @@ HW3b::initVertices()
 
 
 // face normals - for flat shading
-void 
+void
 HW3b::getFaceNorms()
 {
 
-	for(int i = 0; i < m_grid-1; ++i) {
-		for(int j = 0; j < m_grid-1; ++j) {
+	for (int i = 0; i < m_grid - 1; ++i) {
+		for (int j = 0; j < m_grid - 1; ++j) {
 
 			// get vectors from geometry points
-			vec3 &p0 = m_vertices[i  ][j  ];
-			vec3 &p1 = m_vertices[i  ][j+1];
-			vec3 &p2 = m_vertices[i+1][j  ];
-			vec3 &p3 = m_vertices[i+1][j+1];
+			vec3 &p0 = m_vertices[i][j];
+			vec3 &p1 = m_vertices[i][j + 1];
+			vec3 &p2 = m_vertices[i + 1][j];
+			vec3 &p3 = m_vertices[i + 1][j + 1];
 
 			vec3 v0 = p1 - p0;
 			vec3 v1 = p2 - p0;
@@ -739,33 +739,33 @@ HW3b::getFaceNorms()
 
 
 // vertex normals - average of face normals for smooth shading
-void 
+void
 HW3b::getVertNorms()
 {
-	for(int i = 0; i < m_grid; ++i) {
-		for(int j = 0; j < m_grid; ++j) {
+	for (int i = 0; i < m_grid; ++i) {
+		for (int j = 0; j < m_grid; ++j) {
 			// for each vertex, average normals from all faces sharing vertex;
 			// check each quadrant in turn
 			vec3 avg;
 			// right & above
-			if(j < m_grid-1 && i < m_grid-1)
+			if (j < m_grid - 1 && i < m_grid - 1)
 				avg += m_faceNorms[0][i][j];
 
 			// right & below
-			if(j < m_grid-1 && i > 0) {
-				avg += m_faceNorms[0][i-1][j];
-				avg += m_faceNorms[1][i-1][j];
+			if (j < m_grid - 1 && i > 0) {
+				avg += m_faceNorms[0][i - 1][j];
+				avg += m_faceNorms[1][i - 1][j];
 			}
 
 			// left & above
-			if(j > 0 && i < m_grid-1 ) {
-				avg += m_faceNorms[0][i][j-1];
-				avg += m_faceNorms[1][i][j-1];
+			if (j > 0 && i < m_grid - 1) {
+				avg += m_faceNorms[0][i][j - 1];
+				avg += m_faceNorms[1][i][j - 1];
 			}
 
 			// left & below
-			if(j > 0 && i > 0)
-				avg += m_faceNorms[1][i-1][j-1];
+			if (j > 0 && i > 0)
+				avg += m_faceNorms[1][i - 1][j - 1];
 
 			// normalize
 			m_vertNorms[i][j] = avg.normalized();
@@ -810,11 +810,11 @@ HW3b::uploadVertices()
 {
 	// bind vertex buffer to the GPU and copy the vertices from CPU to GPU
 	glBindBuffer(GL_ARRAY_BUFFER, m_vertexBuffer);
-	glBufferData(GL_ARRAY_BUFFER, m_numPoints*sizeof(vec3), &m_points[0], GL_DYNAMIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, m_numPoints * sizeof(vec3), &m_points[0], GL_DYNAMIC_DRAW);
 
 	// enable buffer to be copied to the attribute vertex variable and specify data format
 	glEnableVertexAttribArray(ATTRIB_VERTEX);
-	glVertexAttribPointer	 (ATTRIB_VERTEX, 3, GL_FLOAT, false, 0, NULL);
+	glVertexAttribPointer(ATTRIB_VERTEX, 3, GL_FLOAT, false, 0, NULL);
 }
 
 
@@ -829,11 +829,11 @@ HW3b::uploadTexCoords()
 {
 	// bind texture coord buffer to the GPU and copy the texture coordinates from CPU to GPU
 	glBindBuffer(GL_ARRAY_BUFFER, m_texBuffer);
-	glBufferData(GL_ARRAY_BUFFER, m_numPoints*sizeof(vec2), &m_coords[0], GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, m_numPoints * sizeof(vec2), &m_coords[0], GL_STATIC_DRAW);
 
 	// enable buffer to be copied to the attribute texture coord variable and specify data format
 	glEnableVertexAttribArray(ATTRIB_TEXCOORD);
-	glVertexAttribPointer	 (ATTRIB_TEXCOORD, 2, GL_FLOAT, false, 0, NULL);
+	glVertexAttribPointer(ATTRIB_TEXCOORD, 2, GL_FLOAT, false, 0, NULL);
 }
 
 
@@ -847,7 +847,7 @@ HW3b::uploadNormals()
 {
 	// bind normal buffer to the GPU and copy the normals from CPU to GPU
 	glBindBuffer(GL_ARRAY_BUFFER, m_normalBuffer);
-	glBufferData(GL_ARRAY_BUFFER, m_numPoints*sizeof(vec3), &m_normals[0], GL_DYNAMIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, m_numPoints * sizeof(vec3), &m_normals[0], GL_DYNAMIC_DRAW);
 
 	// enable buffer to be accessed via the attribute normal variable and specify data format
 	glEnableVertexAttribArray(ATTRIB_NORMAL);
@@ -865,7 +865,7 @@ HW3b::uploadColors()
 {
 	// bind color buffer to the GPU and copy the colors from CPU to GPU
 	glBindBuffer(GL_ARRAY_BUFFER, m_colorBuffer);
-	glBufferData(GL_ARRAY_BUFFER, m_numPoints*sizeof(vec3), &m_colors[0], GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, m_numPoints * sizeof(vec3), &m_colors[0], GL_STATIC_DRAW);
 
 	// enable buffer to be accessed via the attribute color variable and specify data format
 	glEnableVertexAttribArray(ATTRIB_COLOR);
@@ -883,11 +883,11 @@ HW3b::uploadIndices()
 	// bind indices buffer to the GPU and copy the indices from CPU to GPU
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_indicesBuffer[0]);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_indices_triangles.size() * sizeof(GLushort),
-			&m_indices_triangles[0], GL_STATIC_DRAW);
+		&m_indices_triangles[0], GL_STATIC_DRAW);
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_indicesBuffer[1]);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_indices_wireframe.size() * sizeof(GLushort),
-			&m_indices_wireframe[0], GL_STATIC_DRAW);
+		&m_indices_wireframe[0], GL_STATIC_DRAW);
 }
 
 
@@ -900,10 +900,10 @@ HW3b::uploadIndices()
 void
 HW3b::flatten2D()
 {
-	for(int k=0, i=0; i < m_grid; ++i) {
-		for(int j=0;  j < m_grid; ++j, k++) {
-			m_points[k]  = m_vertices [i][j];
-			m_coords[k]  = m_texCoords[i][j];
+	for (int k = 0, i = 0; i < m_grid; ++i) {
+		for (int j = 0; j < m_grid; ++j, k++) {
+			m_points[k] = m_vertices[i][j];
+			m_coords[k] = m_texCoords[i][j];
 			m_normals[k] = m_vertNorms[i][j];
 		}
 	}
@@ -935,7 +935,7 @@ void
 HW3b::changeGeom(int val)
 {
 	// pause animation if waving
-	if(m_wave) m_timer->stop();
+	if (m_wave) m_timer->stop();
 
 	// recompute height field
 	m_geometryMode = val;
@@ -951,7 +951,7 @@ HW3b::changeGeom(int val)
 	updateGL();
 
 	// restart animation if it was waving
-	if(m_wave) m_timer->start(10);
+	if (m_wave) m_timer->start(10);
 
 }
 
@@ -966,7 +966,7 @@ void
 HW3b::changeSize(int val)
 {
 	// pause animation if waving
-	if(m_wave) m_timer->stop();
+	if (m_wave) m_timer->stop();
 
 	// update slider and spinbox
 	m_sliderSize->blockSignals(true);
@@ -998,7 +998,7 @@ HW3b::changeSize(int val)
 	updateGL();
 
 	// restart animation if it was waving
-	if(m_wave) m_timer->start(10);
+	if (m_wave) m_timer->start(10);
 
 }
 
@@ -1012,9 +1012,9 @@ HW3b::changeSize(int val)
 void
 HW3b::setDT()
 {
-	float scale = (float) m_grid / MAXGRID;
+	float scale = (float)m_grid / MAXGRID;
 	scale *= scale;
-	m_dt = (m_speed/100.) * scale;
+	m_dt = (m_speed / 100.) * scale;
 }
 
 
@@ -1047,14 +1047,15 @@ HW3b::changeSpeed(int val)
 //
 // Play/pause animation timer.
 //
-void 
+void
 HW3b::playPauseAnimation()
 {
-	if(m_wave) {
+	if (m_wave) {
 		m_wave = false;
 		m_timer->stop();
 		m_buttonStart->setText("Play");
-	} else {
+	}
+	else {
 		m_wave = true;
 		m_buttonStart->setText("Pause");
 		m_timer->start(50);
@@ -1070,7 +1071,7 @@ HW3b::playPauseAnimation()
 //
 // Mouse press event handler.
 //
-void 
+void
 HW3b::mousePressEvent(QMouseEvent *e)
 {
 	// save mouse press position
@@ -1092,7 +1093,8 @@ void HW3b::mouseMoveEvent(QMouseEvent *e)
 	m_mousePressPosition = currentMouse;
 	if (!(e->modifiers() & Qt::CTRL)) {
 		m_camera->rotate(diff);
-	} else {
+	}
+	else {
 		m_light->rotate(diff);
 	}
 

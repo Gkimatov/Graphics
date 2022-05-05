@@ -9,4 +9,4 @@ void main()
 {
 	// PUT YOUR CODE HERE
 	fragColor = texture(u_Sampler, v_TexCoord);
-	}
+}

@@ -7,4 +7,4 @@ void main()
 {
 	// PUT YOUR CODE HERE
 	fragColor = vec4(1.0, 1.0, 1.0, 1.0);
-	}
+}
